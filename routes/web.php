@@ -22,6 +22,9 @@ $router->post('/add-to-favorites', 'AuthController@addToFavorites');
 $router->get('/gateway', 'GatewayController@handleRequest');
 $router->get('/get-favorites', 'FavoritesController@getFavorites');
 $router->delete('/remove-favorite', 'GatewayController@removeFavorite');
+// routes/web.php
+
+$router->get('/get-user-activity', 'GatewayController@getUserActivity');
 
 
 

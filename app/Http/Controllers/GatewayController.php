@@ -8,6 +8,10 @@ use App\Services\BookService;
 use App\Services\MusicService;
 use App\Models\User;
 use App\Models\Favorite;
+use App\Models\Listened;
+use App\Models\BookRead;
+use App\Models\Watched;
+
 
 class GatewayController extends Controller
 {
@@ -36,12 +40,27 @@ class GatewayController extends Controller
 
         switch ($action) {
             case 'getmovie':
+                // Store the history of movies watched
+                MoviesWatched::create([
+                    'username' => $username,
+                    'title' => $title,
+                ]);
                 $result = $this->movieService->search($title);
                 break;
             case 'getbook':
+                // Store the history of books read
+                BookRead::create([
+                    'username' => $username,
+                    'title' => $title,
+                ]);
                 $result = $this->bookService->search($title);
                 break;
             case 'getmusic':
+                // Store the history of music listened
+                Listened::create([
+                    'username' => $username,
+                    'title' => $title,
+                ]);
                 $result = $this->musicService->search($title);
                 break;
             default:
@@ -114,6 +133,33 @@ class GatewayController extends Controller
         $favorite->delete();
 
         return response()->json(['message' => 'Favorite removed successfully'], 200);
+    }
+
+    public function getUserActivity(Request $request)
+    {
+    $action = $request->input('action');
+    $username = $request->input('username');
+    $password = $request->input('password');
+
+    if (!$this->authenticate($username, $password)) {
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
+
+    switch ($action) {
+        case 'watchedmovies':
+            $activity = Watched::where('username', $username)->get();
+            break;
+        case 'musiclistened':
+            $activity = Listened::where('username', $username)->first();
+            break;
+        case 'bookread':
+            $activity = BookRead::where('username', $username)->get();
+            break;
+        default:
+            return response()->json(['error' => 'Invalid action'], 400);
+    }
+
+    return response()->json($activity);
     }
 
 }
